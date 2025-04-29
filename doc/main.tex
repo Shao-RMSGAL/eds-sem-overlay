@@ -1,0 +1,139 @@
+\documentclass[10pt]{exam}
+\usepackage{amsthm}
+\usepackage{libertine}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=0.25in, includefoot]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage[shortlabels]{enumitem}
+\usepackage{cancel}
+\usepackage{listings}
+\usepackage{tikz}
+\usepackage{float}
+\usepackage{mathtools}
+\usepackage{wrapfig, lipsum}
+\usepackage{chemformula}
+\usepackage{empheq}
+\usepackage[hypcap=false]{caption}
+\usepackage{subcaption}
+\usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue]{hyperref}
+% \usepackage[normalem]{ulem}
+\usepackage{graphicx}
+\usepackage{bm}
+\usepackage{accents}
+\usepackage[T1]{fontenc}
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+\usepackage{siunitx}
+\usepackage{minted}
+\usepackage{etoolbox}
+\usepackage{multirow}
+\usepackage[version=4]{mhchem}
+\usepackage{pgfplots}
+\usepackage{svg}
+\usepackage{microtype}
+\usepackage{blindtext}
+\usepackage{booktabs}
+\usepackage{booktabs}
+\usepackage{pdfpages}
+\usepackage{nicematrix}
+\usepackage{cleveref}
+\pgfplotsset{compat=1.18}
+
+
+\AtBeginEnvironment{minted}{
+\fontsize{8}{10}\selectfont}
+\newcommand{\fahrenheit}{^\circ{F}}
+\newcommand*\widefbox[1]{\fbox{\hspace{2em}#1\hspace{2em}}}
+\newcommand{\msout}[1]{
+    \text{\sout{$#1$}}
+}
+\usetikzlibrary{shapes}
+\DeclareSIUnit\year{y}
+\sisetup{
+group-digits=integer,
+group-minimum-digits=3,
+group-separator={,}
+}
+% \newcommand{\class}{NUEN 604 - 600}
+% \newcommand{\examnum}{Homework 1}
+% \newcommand{\examdate}{September 11\textsuperscript{th}}
+% \newcommand{\timelimit}{}
+% \newcommand{\laplace}{\mathcal{L}}
+
+\newcommand{\boxedanswer}[3][0.93]{
+    \fbox{
+        \begin{minipage}{#1\textwidth}
+            #2
+        \end{minipage}
+        }
+    }
+
+\begin{document}
+
+\section{Method overview}
+
+To determine the intergranular versus intragranular attack, a software was 
+written in Python
+which analyzes EDS images for areas of high Cr concentration and compares 
+the data to SEM images. Images can be represented as matrices of pixels, 
+and each pixel in the EDS data can be represented by three
+numbers, red, white, and blue. The range of these numbers range from 0 to 255,
+where the number represents the presence of each color. Because the EDS data
+is monochrome, the image was grayscaled, which means each pixel was set
+to the average RGB value. \par
+
+The SEM was already grayscale, so no pre-processing was done for the
+SEM images. Both images were then converted to black and white, where light
+pixels were converted to white, and dark pixels were converted to black. A 
+manually chosen threshold was used to determine the pixel value threshold
+which differentiates white pixels from black pixels. The software provided
+a black-and-white image next to the original image to allow the user to 
+select a threshold which adequately represented voids in the SEM image, 
+as well as Cr depletion in EDS images. \par
+
+Each pixel in both images were then counted row-by-row, and a dataset was built
+according to \cref{eq:counting}.
+
+\begin{equation}
+    c_{i} = \sum_{j}^W p_{i,j} 
+    \label{eq:counting}
+\end{equation}
+
+where $c_{i}$ is the count of white pixels in row $i$ in the pixel matrix, 
+$j$ is the column of the matrix, $W$ is the width of the pixel matrix in the 
+pixel matrix, and $p_{i,j}$ is the value of the pixel in row $i$ and column $j$
+(1 for black and 0 for white).
+The corresponding depth of each row was found by converting pixels to 
+depth using the scale bars on the SEM and EDS images, and the number of black
+pixels per row as a function of depth was found. For the SEM images, this 
+represented the voids in the material, and for EDS images, this represented
+the chromium depletion in the material. \par
+
+To determine the intergranular corrosion as a function of depth, the 
+SEM pixel matrix was compared pixel-by-pixel to the EDS pixel matrix using
+equation \ref{eq:compare}. \par
+
+\begin{equation}
+    o_{i,j} = \begin{cases}
+        1 & \text{ if }  p^{\text{EDS}}_{i,j} = 1 \text{ and } p^{\text{SEM}}_{i,j} = 1 \\
+        0 & \text{ if otherwise}   \\
+    \end{cases}
+    \label{eq:compare}
+\end{equation}
+
+Where $o_{i,j}$ is the overlaid pixel value of the EDS and SEM images at row
+$i$ and column $j$, $p^{\text{EDS}}_{i,j}$ is the value of the EDS pixel matrix
+ and $p^{\text{SEM}}_{i,j}$ is the value of the SEM pixel matrix. This data was
+ then counted using \cref{eq:counting} to get the intergranular corrosion.
+ Intragranular corrosion was determined using \cref{eq:compare2}.
+
+\begin{equation}
+    o_{i,j} = \begin{cases}
+        1 & \text{ if }  p^{\text{EDS}}_{i,j} = 1 \text{ and } p^{\text{SEM}}_{i,j} = 0 \\
+        0 & \text{ if otherwise}   \\
+    \end{cases}
+    \label{eq:compare2}
+\end{equation}
+
+\end{document}
